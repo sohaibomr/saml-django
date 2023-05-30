@@ -1,16 +1,12 @@
 import logging
 
 from django.conf import settings
-from django.http import HttpResponse
-from django.http import HttpResponseRedirect
-from django.http import HttpResponseServerError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render
 from django.urls import reverse
-
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 from onelogin.saml2.utils import OneLogin_Saml2_Utils
-
 
 log = logging.getLogger(__name__)
 
@@ -21,17 +17,29 @@ def init_saml_auth(req):
         "debug": True,
         "sp": {
             "entityId": "http://0.0.0.0:8000/metadata/",
-            "assertionConsumerService": {"url": "http://localhost:8000/?acs", "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"},
-            "singleLogoutService": {"url": "http://0.0.0.0:8000/?sls", "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"},
+            "assertionConsumerService": {
+                "url": "http://localhost:8000/saml/acs/",
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST",
+            },
+            "singleLogoutService": {
+                "url": "http://0.0.0.0:8000/?sls",
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            },
             "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
             "x509cert": "",
             "privateKey": "",
         },
         "idp": {
             "entityId": "https://sts.windows.net/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/",
-            "singleSignOnService": {"url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2", "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"},
-            "singleLogoutService": {"url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2", "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"},
-            "x509cert": "MIIC8DCCAdigAwIBAgIQQkdjhiWVQr5L83sT41TypTANBgkqhkiG9w0BAQsFADA0MTIwMAYDVQQDEylNaWNyb3NvZnQgQXp1cmUgRmVkZXJhdGVkIFNTTyBDZXJ0aWZpY2F0ZTAeFw0yMzA1MjkwNzQzNDFaFw0yNjA1MjkwNzQzMzlaMDQxMjAwBgNVBAMTKU1pY3Jvc29mdCBBenVyZSBGZWRlcmF0ZWQgU1NPIENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwYhJNAi5cE8tUqjmE/wGXxNFpYLZbWR3aFaZ1fl+rVCIP+pLCA4l3rg51VyQi43Beb8QlfHSJelFD+tFoXJ27gyx/DO9/Udd35eAT/gN4COAEoH89KBvgnYEvCe/5UNL+WrzGyIQSrdc6v00g59scKKfvfeFiULtpAzHcmcRvh6tRxQojlYLmUDNhN0pvSUzGgi1kwaxA+VvNlVtlK9Msw1mCkWHTbLLuYCVyH8M3JAM6mehBtHhHhA6NmPB0lLXV/Qgkw4gynAWdu8MsaEieqB+2+kxBRCjC6vxIZejvfe2KH7lRJCrYNnnYWsdMyt09ISzwEki5+OcXPLoje4CKQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQCAGojs/fUEYv9M1sSimEiMCQI2jObfAVJcGUwZFHRtMJGz4xCraiSrzHuA2tz9k3fUKFVa6JcHerYR8akCDj7K9jNugtBh8i3JOHBd3JhzHe9KXmsIP/ckadMN6Bjy7+f7sqJarH8T80kTvqlgmfO/9Dv3J+YXg3bzmjsPwWFz39gHpzIgLXxA5ehh68qqozyG4KxAZcXyZf3vJkVAFQzCQsuPxAYW9IHBOhG9IycgVWazLfTrdREF30o4cInRGP4LIG+2e8faWNSKw8hQJ9ArrefTScgG6kjQnUYffAO30Kj4pWqlHkpZg7j/hobx6EeKFA77mERvt6DOKhwbnUAu",
+            "singleSignOnService": {
+                "url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2",
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            },
+            "singleLogoutService": {
+                "url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2",
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect",
+            },
+            "x509cert": "",
         },
         "security": {
             "nameIdEncrypted": False,
@@ -50,8 +58,23 @@ def init_saml_auth(req):
             "rejectDeprecatedAlgorithm": True,
             "wantAttributeStatement": False,
         },
-        "contactPerson": {"technical": {"givenName": "technical_name", "emailAddress": "technical@example.com"}, "support": {"givenName": "support_name", "emailAddress": "support@example.com"}},
-        "organization": {"en-US": {"name": "sp_test", "displayname": "SP test", "url": "http://sp.example.com"}},
+        "contactPerson": {
+            "technical": {
+                "givenName": "technical_name",
+                "emailAddress": "technical@example.com",
+            },
+            "support": {
+                "givenName": "support_name",
+                "emailAddress": "support@example.com",
+            },
+        },
+        "organization": {
+            "en-US": {
+                "name": "sp_test",
+                "displayname": "SP test",
+                "url": "http://sp.example.com",
+            }
+        },
     }
     auth = OneLogin_Saml2_Auth(req, old_settings=settings, custom_base_path=None)
     return auth
@@ -103,7 +126,15 @@ def index(request):
         if "samlNameIdSPNameQualifier" in request.session:
             name_id_spnq = request.session["samlNameIdSPNameQualifier"]
 
-        return HttpResponseRedirect(auth.logout(name_id=name_id, session_index=session_index, nq=name_id_nq, name_id_format=name_id_format, spnq=name_id_spnq))
+        return HttpResponseRedirect(
+            auth.logout(
+                name_id=name_id,
+                session_index=session_index,
+                nq=name_id_nq,
+                name_id_format=name_id_format,
+                spnq=name_id_spnq,
+            )
+        )
         # If LogoutRequest ID need to be stored in order to later validate it, do instead
         # slo_built_url = auth.logout(name_id=name_id, session_index=session_index)
         # request.session['LogoutRequestID'] = auth.get_last_request_id()
@@ -129,10 +160,16 @@ def index(request):
             request.session["samlNameIdNameQualifier"] = auth.get_nameid_nq()
             request.session["samlNameIdSPNameQualifier"] = auth.get_nameid_spnq()
             request.session["samlSessionIndex"] = auth.get_session_index()
-            if "RelayState" in req["post_data"] and OneLogin_Saml2_Utils.get_self_url(req) != req["post_data"]["RelayState"]:
+            if (
+                "RelayState" in req["post_data"]
+                and OneLogin_Saml2_Utils.get_self_url(req)
+                != req["post_data"]["RelayState"]
+            ):
                 # To avoid 'Open Redirect' attacks, before execute the redirection confirm
                 # the value of the req['post_data']['RelayState'] is a trusted URL.
-                return HttpResponseRedirect(auth.redirect_to(req["post_data"]["RelayState"]))
+                return HttpResponseRedirect(
+                    auth.redirect_to(req["post_data"]["RelayState"])
+                )
         elif auth.get_settings().is_debug_active():
             error_reason = auth.get_last_error_reason()
     elif "sls" in req["get_data"]:
@@ -158,7 +195,16 @@ def index(request):
             attributes = request.session["samlUserdata"].items()
 
     return render(
-        request, "index.html", {"errors": errors, "error_reason": error_reason, "not_auth_warn": not_auth_warn, "success_slo": success_slo, "attributes": attributes, "paint_logout": paint_logout}
+        request,
+        "index.html",
+        {
+            "errors": errors,
+            "error_reason": error_reason,
+            "not_auth_warn": not_auth_warn,
+            "success_slo": success_slo,
+            "attributes": attributes,
+            "paint_logout": paint_logout,
+        },
     )
 
 
@@ -170,14 +216,18 @@ def attrs(request):
         paint_logout = True
         if len(request.session["samlUserdata"]) > 0:
             attributes = request.session["samlUserdata"].items()
-    return render(request, "attrs.html", {"paint_logout": paint_logout, "attributes": attributes})
+    return render(
+        request, "attrs.html", {"paint_logout": paint_logout, "attributes": attributes}
+    )
 
 
 def metadata(request):
     # req = prepare_django_request(request)
     # auth = init_saml_auth(req)
     # saml_settings = auth.get_settings()
-    saml_settings = OneLogin_Saml2_Settings(settings=None, custom_base_path=settings.SAML_FOLDER, sp_validation_only=True)
+    saml_settings = OneLogin_Saml2_Settings(
+        settings=None, custom_base_path=settings.SAML_FOLDER, sp_validation_only=True
+    )
     metadata = saml_settings.get_sp_metadata()
     errors = saml_settings.validate_metadata(metadata)
 
@@ -186,3 +236,66 @@ def metadata(request):
     else:
         resp = HttpResponseServerError(content=", ".join(errors))
     return resp
+
+
+def login(request):
+    req = prepare_django_request(request)
+    auth = init_saml_auth(req)
+    sso_built_url = auth.login()
+    request.session["AuthNRequestID"] = auth.get_last_request_id()
+    return HttpResponseRedirect(sso_built_url)
+
+
+def acs(request):
+    req = prepare_django_request(request)
+    auth = init_saml_auth(req)
+    auth.process_response()
+    errors = auth.get_errors()
+    not_auth_warn = not auth.is_authenticated()
+    attributes = False
+    error_reason = None
+    not_auth_warn = False
+    success_slo = False
+    attributes = False
+    paint_logout = False
+
+    if not errors:
+        if "AuthNRequestID" in request.session:
+            del request.session["AuthNRequestID"]
+        request.session["samlUserdata"] = auth.get_attributes()
+        log.debug("***********")
+        log.debug(auth.get_attributes())
+        log.debug("***********")
+        request.session["samlNameId"] = auth.get_nameid()
+        request.session["samlNameIdFormat"] = auth.get_nameid_format()
+        request.session["samlNameIdNameQualifier"] = auth.get_nameid_nq()
+        request.session["samlNameIdSPNameQualifier"] = auth.get_nameid_spnq()
+        request.session["samlSessionIndex"] = auth.get_session_index()
+        if (
+            "RelayState" in req["post_data"]
+            and OneLogin_Saml2_Utils.get_self_url(req) != req["post_data"]["RelayState"]
+        ):
+            # To avoid 'Open Redirect' attacks, before execute the redirection confirm
+            # the value of the req['post_data']['RelayState'] is a trusted URL.
+            return HttpResponseRedirect(
+                auth.redirect_to(req["post_data"]["RelayState"])
+            )
+    elif auth.get_settings().is_debug_active():
+        error_reason = auth.get_last_error_reason()
+
+    if "samlUserdata" in request.session:
+        paint_logout = True
+        if len(request.session["samlUserdata"]) > 0:
+            attributes = request.session["samlUserdata"].items()
+
+    return render(
+        request,
+        "index.html",
+        {
+            "errors": errors,
+            "error_reason": error_reason,
+            "not_auth_warn": not_auth_warn,
+            "attributes": attributes,
+            "paint_logout": paint_logout,
+        },
+    )
