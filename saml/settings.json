@@ -1,0 +1,30 @@
+{
+    "strict": true,
+    "debug": true,
+    "sp": {
+        "entityId": "http://0.0.0.0:8000/metadata/",
+        "assertionConsumerService": {
+            "url": "http://localhost:8000/?acs",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+        },
+        "singleLogoutService": {
+            "url": "http://0.0.0.0:8000/?sls",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
+        "x509cert": "",
+        "privateKey": ""
+    },
+    "idp": {
+        "entityId": "https://sts.windows.net/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/",
+        "singleSignOnService": {
+            "url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "singleLogoutService": {
+            "url": "https://login.microsoftonline.com/2f6cb1a6-ecb8-4578-b680-bf84ded07ff4/saml2",
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        "x509cert": "<your x509_cert>"
+    }
+}
